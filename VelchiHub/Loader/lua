@@ -1,4 +1,4 @@
-loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/p3goBhIAT5lKMIxg/raw"))()
+loadstring(game:HttpGet("https://pastefy.app/ggutZgSW/raw"))()
 --// Services
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
